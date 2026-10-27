@@ -47,7 +47,7 @@ Edit `urls.txt` to choose which sites to monitor.
 - Python basics in practice: functions, try/except error handling, file reading, and the logging module
 
 ## Roadmap
-- [ ] Run in Docker
+- [x ] Run in Docker
 - [ ] Deploy on AWS EC2 with Terraform
 - [ ] Send logs to CloudWatch
 - [ ] Email alerts when a site goes DOWN
