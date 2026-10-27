@@ -12,8 +12,14 @@ def load_urls(path="urls.txt"):
                 urls.append(text)
     return urls
 
-CHECK_INTERVAL = 60        # seconds between rounds
-SLOW_THRESHOLD_MS = 2000   # slower than this = SLOW
+# How many seconds to wait between check rounds.
+# Reads CHECK_INTERVAL from outside (env variable); if not set, uses 60.
+# int() converts the text "60" into the number 60.
+CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "60"))
+
+# Response time (in ms) above which a site is marked SLOW.
+# Reads SLOW_THRESHOLD_MS from outside; if not set, uses 2000.
+SLOW_THRESHOLD_MS = int(os.getenv("SLOW_THRESHOLD_MS", "2000"))
 
 os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
