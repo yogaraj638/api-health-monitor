@@ -12,6 +12,9 @@ def load_urls(path="urls.txt"):
                 urls.append(text)
     return urls
 
+from dotenv import load_dotenv
+load_dotenv()   # reads the .env file and loads its settings as environment variables
+
 # How many seconds to wait between check rounds.
 # Reads CHECK_INTERVAL from outside (env variable); if not set, uses 60.
 # int() converts the text "60" into the number 60.
