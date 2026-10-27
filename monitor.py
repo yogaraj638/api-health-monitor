@@ -1,6 +1,7 @@
 import requests
 import time
 import logging
+import os
 
 def load_urls(path="urls.txt"):
     urls = []
@@ -14,8 +15,9 @@ def load_urls(path="urls.txt"):
 CHECK_INTERVAL = 60        # seconds between rounds
 SLOW_THRESHOLD_MS = 2000   # slower than this = SLOW
 
+os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
-    filename="monitor.log",
+    filename="logs/monitor.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
