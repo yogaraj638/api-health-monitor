@@ -1,0 +1,15 @@
+# Sites to monitor - one per line
+
+# --- Real sites (should be UP) ---
+https://www.google.com
+https://github.com
+https://yogaraj-portfolio-liart.vercel.app
+https://api.github.com
+
+# --- Test cases (fail on purpose) ---
+https://httpbin.org/status/500
+https://httpbin.org/status/404
+https://httpbin.org/delay/3
+https://httpbin.org/delay/10
+https://this-site-does-not-exist-12345.com
+https://example.com

@@ -2,12 +2,14 @@ import requests
 import time
 import logging
 
-URLS = [
-    "https://www.google.com",
-    "https://github.com",
-    "https://httpbin.org/status/500",
-    "https://this-site-does-not-exist-12345.com",
-]
+def load_urls(path="urls.txt"):
+    urls = []
+    with open(path) as file:
+        for text in file:
+            text = text.strip()
+            if text and not text.startswith("#"):
+                urls.append(text)
+    return urls
 
 CHECK_INTERVAL = 60        # seconds between rounds
 SLOW_THRESHOLD_MS = 2000   # slower than this = SLOW
@@ -49,9 +51,16 @@ def check(url):
     else:
         logging.warning(line)
 
-print("Monitor started. Press Ctrl+C to stop.")
-while True:
-    for url in URLS:
-        check(url)
-    print(f"--- sleeping {CHECK_INTERVAL}s ---")
-    time.sleep(CHECK_INTERVAL)
+URLS = load_urls()
+print(f"Monitor started with {len(URLS)} URLs. Press Ctrl+C to stop.")
+logging.info(f"Monitor started with {len(URLS)} URLs")
+
+try:
+    while True:
+        for url in URLS:
+            check(url)
+        print(f"--- sleeping {CHECK_INTERVAL}s ---")
+        time.sleep(CHECK_INTERVAL)
+except KeyboardInterrupt:
+    print("\nMonitor stopped.")
+    logging.info("Monitor stopped by user")
