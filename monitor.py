@@ -2,6 +2,7 @@ import requests
 import time
 import logging
 import os
+import signal
 
 def load_urls(path="urls.txt"):
     urls = []
@@ -61,6 +62,14 @@ def check(url):
         logging.info(line)
     else:
         logging.warning(line)
+
+# When Docker sends SIGTERM (docker stop), treat it like Ctrl+C
+def handle_stop(signum, frame):
+    raise KeyboardInterrupt
+
+# Register handle_stop to run whenever a SIGTERM arrives
+signal.signal(signal.SIGTERM, handle_stop)        
+
 
 URLS = load_urls()
 print(f"Monitor started with {len(URLS)} URLs. Press Ctrl+C to stop.")
