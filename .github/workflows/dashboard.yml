@@ -1,0 +1,71 @@
+# ============================================================
+# GitHub Actions workflow: check all URLs and publish the
+# dashboard to GitHub Pages (free, permanent live link).
+# ============================================================
+
+# Name shown in the "Actions" tab on GitHub
+name: Publish dashboard
+
+# ---------- TRIGGERS: WHEN does this run? ----------
+on:
+  # 1) On a timer. Cron format: minute hour day month weekday (UTC)
+  #    "*/15 * * * *" = every 15 minutes, every day
+  schedule:
+    - cron: "*/15 * * * *"
+
+  # 2) Adds a "Run workflow" button on GitHub for manual runs
+  workflow_dispatch:
+
+  # 3) Every time code is pushed to the main branch (CI/CD)
+  push:
+    branches: [main]
+
+# ---------- PERMISSIONS: what is this workflow allowed to do? ----------
+# Least privilege: only what is needed, nothing more
+permissions:
+  contents: read     # read the repo code (cannot modify it)
+  pages: write       # publish to GitHub Pages
+  id-token: write    # prove identity to Pages (no passwords needed)
+
+# ---------- CONCURRENCY: avoid two runs publishing at once ----------
+concurrency:
+  group: pages              # all runs share this group
+  cancel-in-progress: true  # a newer run cancels an older one
+
+# ---------- JOBS: the actual work ----------
+jobs:
+  check-and-publish:                 # job name (our choice)
+    runs-on: ubuntu-latest           # borrow a fresh Ubuntu Linux machine
+
+    # Mark this as a deployment to "github-pages" and show the live URL
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}   # filled in at run time
+
+    # ---------- STEPS: run in order; if one fails, the rest stop ----------
+    steps:
+      # Step 1: download this repo's code onto the empty machine
+      - uses: actions/checkout@v4
+
+      # Step 2: install Python (same version as our Dockerfile)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # Step 3: install our packages from requirements.txt
+      - run: pip install -r requirements.txt
+
+      # Step 4: run ONE round of checks and write public/index.html, then exit
+      #         (RUN_ONCE stops the infinite loop; jobs must finish)
+      - run: python monitor.py
+        env:
+          RUN_ONCE: "true"
+
+      # Step 5: package the public/ folder so it survives after the machine is deleted
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      # Step 6: publish that package as the live website
+      - id: deployment                  # name this step so "url:" above can read its output
+        uses: actions/deploy-pages@v4
