@@ -62,6 +62,7 @@ def check(url):
         logging.info(line)
     else:
         logging.warning(line)
+    return {"status": status, "code": code, "ms": ms, "url": url, "reason": reason}    
 
 # When Docker sends SIGTERM (docker stop), treat it like Ctrl+C
 def handle_stop(signum, frame):
