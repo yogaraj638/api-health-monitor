@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="15">
+  <title>API Health Monitor</title>
+  <style>
+    body  { font-family: Arial, sans-serif; margin: 40px; color: #222; }
+    h1    { margin-bottom: 4px; }
+    .sub  { color: #777; margin-bottom: 24px; }
+    .cards { display: flex; gap: 12px; margin-bottom: 24px; }
+    .card { background: #f4f4f4; padding: 12px 20px; border-radius: 8px; }
+    .card b { display: block; font-size: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+    .UP    { color: #1a7f37; font-weight: bold; }
+    .SLOW  { color: #b58100; font-weight: bold; }
+    .ERROR { color: #b58100; font-weight: bold; }
+    .DOWN  { color: #c62828; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>API Health Monitor</h1>
+  <div class="sub">Last check: 2026-11-03 15:11:58 UTC · refreshes every 15s</div>
+
+  <div class="cards">
+    <div class="card">Up<b class="UP">4</b></div>
+    <div class="card">Slow<b class="SLOW">1</b></div>
+    <div class="card">Error<b class="ERROR">2</b></div>
+    <div class="card">Down<b class="DOWN">3</b></div>
+  </div>
+
+  <table>
+    <tr><th>Status</th><th>URL</th><th>Code</th><th>Time (ms)</th><th>Reason</th></tr>
+<tr><td class='UP'>UP</td><td>https://www.google.com</td><td>200</td><td>540</td><td>-</td></tr>
+<tr><td class='UP'>UP</td><td>https://github.com</td><td>200</td><td>812</td><td>-</td></tr>
+<tr><td class='UP'>UP</td><td>https://yogaraj-portfolio-liart.vercel.app</td><td>200</td><td>468</td><td>-</td></tr>
+<tr><td class='ERROR'>ERROR</td><td>https://api.github.com</td><td>403</td><td>529</td><td>-</td></tr>
+<tr><td class='DOWN'>DOWN</td><td>https://httpbin.org/status/500</td><td>500</td><td>1203</td><td>-</td></tr>
+<tr><td class='ERROR'>ERROR</td><td>https://httpbin.org/status/404</td><td>404</td><td>1275</td><td>-</td></tr>
+<tr><td class='SLOW'>SLOW</td><td>https://httpbin.org/delay/3</td><td>200</td><td>4243</td><td>-</td></tr>
+<tr><td class='DOWN'>DOWN</td><td>https://httpbin.org/delay/10</td><td>-</td><td>-</td><td>ReadTimeout</td></tr>
+<tr><td class='DOWN'>DOWN</td><td>https://this-site-does-not-exist-12345.com</td><td>-</td><td>-</td><td>ConnectionError</td></tr>
+<tr><td class='UP'>UP</td><td>https://example.com</td><td>200</td><td>428</td><td>-</td></tr>
+
+  </table>
+</body>
+</html>
