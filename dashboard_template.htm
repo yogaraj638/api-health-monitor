@@ -1,135 +1,38 @@
-import requests
-import time
-import logging
-import os
-import signal
-import threading
-from functools import partial
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-from dotenv import load_dotenv
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="__REFRESH__">
+  <title>API Health Monitor</title>
+  <style>
+    body  { font-family: Arial, sans-serif; margin: 40px; color: #222; }
+    h1    { margin-bottom: 4px; }
+    .sub  { color: #777; margin-bottom: 24px; }
+    .cards { display: flex; gap: 12px; margin-bottom: 24px; }
+    .card { background: #f4f4f4; padding: 12px 20px; border-radius: 8px; }
+    .card b { display: block; font-size: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+    .UP    { color: #1a7f37; font-weight: bold; }
+    .SLOW  { color: #b58100; font-weight: bold; }
+    .ERROR { color: #b58100; font-weight: bold; }
+    .DOWN  { color: #c62828; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>API Health Monitor</h1>
+  <div class="sub">Last check: __CHECKED_AT__ · refreshes every __REFRESH__s</div>
 
-load_dotenv()  # load settings from .env (if the file exists)
+  <div class="cards">
+    <div class="card">Up<b class="UP">__UP__</b></div>
+    <div class="card">Slow<b class="SLOW">__SLOW__</b></div>
+    <div class="card">Error<b class="ERROR">__ERROR__</b></div>
+    <div class="card">Down<b class="DOWN">__DOWN__</b></div>
+  </div>
 
-# ---------- Settings (from environment, with defaults) ----------
-CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "60"))        # seconds between rounds
-SLOW_THRESHOLD_MS = int(os.getenv("SLOW_THRESHOLD_MS", "2000"))  # slower = SLOW
-WEB_PORT = int(os.getenv("WEB_PORT", "8080"))                    # dashboard port
-RUN_ONCE = os.getenv("RUN_ONCE", "false").lower() == "true"      # one round, then exit
-
-# ---------- Logging ----------
-os.makedirs("logs", exist_ok=True)
-logging.basicConfig(
-    filename="logs/monitor.log",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
-
-
-def load_urls(path="urls.txt"):
-    """Read URLs from a file, skipping blank lines and # comments."""
-    urls = []
-    with open(path) as file:
-        for text in file:
-            text = text.strip()
-            if text and not text.startswith("#"):
-                urls.append(text)
-    return urls
-
-
-def check(url):
-    """Check one URL, log the result, and return it as a dictionary."""
-    start = time.time()
-    try:
-        response = requests.get(url, timeout=5)
-        ms = round((time.time() - start) * 1000)
-        code = response.status_code
-        if code >= 500:
-            status = "DOWN"
-        elif code >= 400:
-            status = "ERROR"
-        elif ms > SLOW_THRESHOLD_MS:
-            status = "SLOW"
-        else:
-            status = "UP"
-        reason = "-"
-    except requests.exceptions.RequestException as error:
-        ms, code, status = "-", "-", "DOWN"
-        reason = type(error).__name__
-
-    line = f"status={status} code={code} time_ms={ms} url={url} reason={reason}"
-    print(line)
-    if status == "UP":
-        logging.info(line)
-    else:
-        logging.warning(line)
-
-    return {"status": status, "code": code, "ms": ms, "url": url, "reason": reason}
-
-
-def write_dashboard(results):
-    """Fill the HTML template with results and save public/index.html."""
-    counts = {"UP": 0, "SLOW": 0, "ERROR": 0, "DOWN": 0}
-    rows = ""
-    for r in results:
-        counts[r["status"]] += 1
-        rows += (
-            f"<tr><td class='{r['status']}'>{r['status']}</td>"
-            f"<td>{r['url']}</td><td>{r['code']}</td>"
-            f"<td>{r['ms']}</td><td>{r['reason']}</td></tr>\n"
-        )
-
-    with open("dashboard_template.html") as file:
-        html = file.read()
-
-    html = html.replace("__ROWS__", rows)
-    for name in counts:
-        html = html.replace(f"__{name}__", str(counts[name]))
-    html = html.replace("__REFRESH__", str(CHECK_INTERVAL))
-    html = html.replace("__CHECKED_AT__", time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
-
-    with open("public/index.html", "w") as file:
-        file.write(html)
-
-
-def run_round(urls):
-    """Check every URL once, then rebuild the dashboard."""
-    results = []
-    for url in urls:
-        results.append(check(url))
-    write_dashboard(results)
-
-
-def start_web_server():
-    """Serve the public/ folder at http://localhost:WEB_PORT in the background."""
-    handler = partial(SimpleHTTPRequestHandler, directory="public")
-    server = HTTPServer(("0.0.0.0", WEB_PORT), handler)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    print(f"Dashboard running at http://localhost:{WEB_PORT}")
-
-
-def handle_stop(signum, frame):
-    """Treat SIGTERM (docker stop) like Ctrl+C for a clean shutdown."""
-    raise KeyboardInterrupt
-
-
-signal.signal(signal.SIGTERM, handle_stop)
-
-# ---------- Main ----------
-URLS = load_urls()
-os.makedirs("public", exist_ok=True)
-
-if RUN_ONCE:
-    # Used by GitHub Actions: one round, write the page, exit.
-    run_round(URLS)
-else:
-    start_web_server()
-    print(f"Monitor started with {len(URLS)} URLs.")
-    logging.info(f"Monitor started with {len(URLS)} URLs")
-    try:
-        while True:
-            run_round(URLS)
-            print(f"--- sleeping {CHECK_INTERVAL}s ---")
-            time.sleep(CHECK_INTERVAL)
-    except KeyboardInterrupt:
-        print("\nMonitor stopped.")
-        logging.info("Monitor stopped by user")
+  <table>
+    <tr><th>Status</th><th>URL</th><th>Code</th><th>Time (ms)</th><th>Reason</th></tr>
+__ROWS__
+  </table>
+</body>
+</html>
