@@ -1,6 +1,6 @@
-# api-health-monitor
-
 # API Health Monitor
+
+**Live dashboard:** https://yogaraj638.github.io/api-health-monitor/ (updates every 15 minutes via GitHub Actions)
 
 A Python tool that checks websites and APIs every 60 seconds and logs whether each one is up, slow, or failing.
 
