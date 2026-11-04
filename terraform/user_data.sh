@@ -1,6 +1,6 @@
 #!/bin/bash
 # Runs once, as root, when the EC2 instance first boots.
-# ${...} values are filled in by Terraform's templatefile().
+# Values in dollar-brace placeholders are filled in by Terraform's templatefile().
 set -e                                   # stop at the first error
 
 dnf install -y docker git                # dnf = Amazon Linux's package manager
