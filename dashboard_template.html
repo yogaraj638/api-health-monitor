@@ -1,38 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="__REFRESH__">
   <title>API Health Monitor</title>
   <style>
-    body  { font-family: Arial, sans-serif; margin: 40px; color: #222; }
-    h1    { margin-bottom: 4px; }
-    .sub  { color: #777; margin-bottom: 24px; }
-    .cards { display: flex; gap: 12px; margin-bottom: 24px; }
-    .card { background: #f4f4f4; padding: 12px 20px; border-radius: 8px; }
-    .card b { display: block; font-size: 24px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #ddd; }
-    .UP    { color: #1a7f37; font-weight: bold; }
-    .SLOW  { color: #b58100; font-weight: bold; }
-    .ERROR { color: #b58100; font-weight: bold; }
-    .DOWN  { color: #c62828; font-weight: bold; }
+    :root { --bg:#f6f7f9; --card:#fff; --text:#1f2328; --muted:#6b7280; --line:#e5e7eb;
+            --up:#1a7f37; --warn:#b58100; --down:#c62828; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8b949e; --line:#30363d;
+              --up:#3fb950; --warn:#d29922; --down:#f85149; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text);
+           font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+    header { display:flex; justify-content:space-between; align-items:flex-end;
+             flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+    h1 { margin:0; font-size:24px; }
+    .sub { color:var(--muted); font-size:14px; }
+    .live { display:inline-block; width:8px; height:8px; border-radius:50%;
+            background:var(--up); margin-right:6px; animation:pulse 2s infinite; }
+    @keyframes pulse { 50% { opacity:.3; } }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+             gap:12px; margin-bottom:24px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+    .card span { color:var(--muted); font-size:13px; }
+    .card b { display:block; font-size:28px; margin-top:4px; }
+    .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow-x:auto; }
+    table { border-collapse:collapse; width:100%; font-size:14px; }
+    th { text-align:left; color:var(--muted); font-weight:500; padding:12px 16px;
+         border-bottom:1px solid var(--line); }
+    td { padding:12px 16px; border-bottom:1px solid var(--line); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(127,127,127,.06); }
+    td:nth-child(2) { font-family: Consolas, monospace; font-size:13px; word-break:break-all; }
+    .UP, .SLOW, .ERROR, .DOWN { font-weight:600; white-space:nowrap; }
+    td.UP::before, td.SLOW::before, td.ERROR::before, td.DOWN::before {
+      content:""; display:inline-block; width:8px; height:8px; border-radius:50%;
+      margin-right:8px; background:currentColor; }
+    .UP { color:var(--up); }  .SLOW, .ERROR { color:var(--warn); }  .DOWN { color:var(--down); }
+    footer { color:var(--muted); font-size:13px; margin-top:20px; text-align:center; }
+    footer a { color:inherit; }
   </style>
 </head>
 <body>
-  <h1>API Health Monitor</h1>
-  <div class="sub">Last check: __CHECKED_AT__ · refreshes every __REFRESH__s</div>
+  <div class="wrap">
+    <header>
+      <h1>API Health Monitor</h1>
+      <div class="sub"><span class="live"></span>Last check: __CHECKED_AT__ · refreshes every __REFRESH__s</div>
+    </header>
 
-  <div class="cards">
-    <div class="card">Up<b class="UP">__UP__</b></div>
-    <div class="card">Slow<b class="SLOW">__SLOW__</b></div>
-    <div class="card">Error<b class="ERROR">__ERROR__</b></div>
-    <div class="card">Down<b class="DOWN">__DOWN__</b></div>
-  </div>
+    <div class="cards">
+      <div class="card"><span>Up</span><b class="UP">__UP__</b></div>
+      <div class="card"><span>Slow</span><b class="SLOW">__SLOW__</b></div>
+      <div class="card"><span>Error</span><b class="ERROR">__ERROR__</b></div>
+      <div class="card"><span>Down</span><b class="DOWN">__DOWN__</b></div>
+    </div>
 
-  <table>
-    <tr><th>Status</th><th>URL</th><th>Code</th><th>Time (ms)</th><th>Reason</th></tr>
+    <div class="panel">
+      <table>
+        <tr><th>Status</th><th>URL</th><th>Code</th><th>Time (ms)</th><th>Reason</th></tr>
 __ROWS__
-  </table>
+      </table>
+    </div>
+
+    <footer>
+      Built with Python, Docker, Terraform (AWS EC2 + CloudWatch) and GitHub Actions ·
+      <a href="https://github.com/yogaraj638/api-health-monitor">Source on GitHub</a>
+    </footer>
+  </div>
 </body>
 </html>
